@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Резюме — форма и таблица</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f3f6fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 32px 24px 24px 24px;
+        }
+        .menu {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+            gap: 24px;
+        }
+        .menu-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1976d2;
+            cursor: pointer;
+            padding: 8px 18px;
+            border-radius: 6px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .menu-btn.active, .menu-btn:hover {
+            background: #1976d2;
+            color: #fff;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #2d3a4b;
+        }
+        .ai-freeform {
+            margin-bottom: 24px;
+        }
+        .ai-freeform textarea {
+            width: 100%;
+            min-height: 100px;
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #cfd8dc;
+            background: #f9fbfc;
+            margin-bottom: 8px;
+        }
+        .ai-btn {
+            padding: 10px 18px;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+        .ai-btn:hover {
+            background: #125ea7;
+        }
+        .ai-result {
+            margin-top: 8px;
+            background: #f5f7fa;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 15px;
+        }
+        .ai-error {
+            color: #c62828;
+            margin-top: 8px;
+        }
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 32px;
+            margin-bottom: 32px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #2d3a4b;
+        }
+        input, textarea, select {
+            padding: 8px 10px;
+            border: 1px solid #cfd8dc;
+            border-radius: 5px;
+            font-size: 15px;
+            background: #f9fbfc;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 38px;
+        }
+        .full-width {
+            grid-column: 1 / 3;
+        }
+        button[type="submit"] {
+            grid-column: 1 / 3;
+            padding: 12px;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        button[type="submit"]:hover {
+            background: #125ea7;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            background: #fff;
+        }
+        th, td {
+            border: 1px solid #e0e6ed;
+            padding: 10px 8px;
+            text-align: left;
+        }
+        th {
+            background: #f5f7fa;
+            color: #2d3a4b;
+            font-weight: 700;
+        }
+        tr:nth-child(even) {
+            background: #f9fbfc;
+        }
+        .center {
+            text-align: center;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .hint {
+            font-size: 13px;
+            color: #607d8b;
+            margin-top: 3px;
+            margin-bottom: 0;
+        }
+        .autocomplete-suggestions {
+            position: absolute;
+            background: #fff;
+            border: 1px solid #cfd8dc;
+            border-radius: 6px;
+            margin: 2px 0 0 0;
+            padding: 0;
+            list-style: none;
+            z-index: 10;
+            width: 100%;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+        .autocomplete-suggestions li {
+            padding: 7px 12px;
+            cursor: pointer;
+        }
+        .autocomplete-suggestions li:hover {
+            background: #f0f4fa;
+        }
+        .card-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-top: 24px;
+        }
+        .resume-card {
+            position: relative;
+            background: #f9fbfc;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.07);
+            padding: 22px 20px 16px 20px;
+            min-width: 320px;
+            max-width: 400px;
+            flex: 1 1 320px;
+            border: 1px solid #e0e6ed;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .resume-card h3 {
+            margin: 0 0 8px 0;
+            color: #1976d2;
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .resume-card .card-row {
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+        }
+        .resume-card .label {
+            color: #607d8b;
+            font-size: 14px;
+            min-width: 110px;
+        }
+        .resume-card .value {
+            font-size: 15px;
+            color: #222;
+            font-weight: 500;
+        }
+        .resume-card .skills {
+            color: #388e3c;
+            font-size: 14px;
+        }
+        .resume-card .soft {
+            color: #1976d2;
+            font-size: 14px;
+        }
+        .delete-resume-btn {
+            position: absolute;
+            right: 18px;
+            top: 14px;
+            background: #fff;
+            color: #1976d2;
+            border: 2px solid #1976d2;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 20px;
+            line-height: 24px;
+            cursor: pointer;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s, border 0.2s;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+        }
+        .delete-resume-btn:hover {
+            background: #1976d2;
+            color: #fff;
+            border: 2px solid #125ea7;
+        }
+        .expand-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        .expand-btn:hover {
+            background: #125ea7;
+        }
+        .export-menu {
+            margin-top: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .export-menu.show {
+            display: flex;
+        }
+        .export-menu-btn {
+            padding: 10px 16px;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .export-menu-btn:hover {
+            background: #125ea7;
+        }
+        .export-menu-btn.hhru {
+            background: linear-gradient(90deg, #ff5c35 0%, #ff914d 100%);
+        }
+        .export-menu-btn.hhru:hover {
+            background: linear-gradient(90deg, #ff914d 0%, #ff5c35 100%);
+        }
+        /* --- AUTH MODAL ADAPTIVE --- */
+        #auth-modal form input[type="text"],
+        #auth-modal form input[type="password"] {
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 17px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #auth-modal form .form-group {
+            margin-bottom: 10px;
+        }
+        #auth-modal > div {
+            min-width: 320px;
+            max-width: 400px;
+            width: 90vw;
+        }
+        @media (max-width: 480px) {
+            #auth-modal > div {
+                min-width: 0;
+                max-width: 98vw;
+                padding: 18px 6vw;
+            }
+            #auth-modal form input[type="text"],
+            #auth-modal form input[type="password"] {
+                font-size: 15px;
+                padding: 8px;
+            }
+        }
+        #forgot-modal {
+            display:none;position:fixed;z-index:2100;top:0;left:0;width:100vw;height:100vh;background:rgba(44,62,80,0.65);justify-content:center;align-items:center;
+        }
+        #forgot-modal > div {
+            background:#fff;border-radius:12px;max-width:350px;width:90vw;padding:32px 24px;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.18);
+        }
+        #forgot-modal input[type="text"], #forgot-modal input[type="email"], #forgot-modal input[type="password"] {
+            width:100%;box-sizing:border-box;font-size:17px;padding:10px;margin-bottom:10px;
+        }
+        @media (max-width: 480px) {
+            #forgot-modal > div { min-width:0;max-width:98vw;padding:18px 6vw; }
+            #forgot-modal input[type="text"], #forgot-modal input[type="email"], #forgot-modal input[type="password"] { font-size:15px;padding:8px; }
+        }
+        @media (max-width: 900px) {
+            .container {
+                max-width: 100vw;
+                padding: 10px 0 10px 0;
+            }
+            .form-group, .form-group input, .form-group textarea, .form-group select {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .menu-btn, .ai-btn, button[type="submit"] {
+                width: 100%;
+                box-sizing: border-box;
+                min-width: 0;
+            }
+            .card-list {
+                gap: 14px;
+            }
+        }
+        @media (max-width: 700px) {
+            .container {
+                max-width: 100vw;
+                padding: 8px 0 8px 0;
+            }
+            .menu {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            .card-list {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .resume-card {
+                min-width: 0;
+                max-width: 98vw;
+                width: 100%;
+                box-sizing: border-box;
+                padding: 16px 8px 12px 8px;
+            }
+            form, .form-group, .form-group input, .form-group textarea, .form-group select {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .menu-btn, .ai-btn, button[type="submit"] {
+                width: 100%;
+                min-width: 0;
+                box-sizing: border-box;
+            }
+            .full-width, button[type="submit"] {
+                grid-column: 1 / 2;
+            }
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 0;
+            }
+            form, .form-group, .form-group input, .form-group textarea, .form-group select {
+                width: 100vw;
+                max-width: 100vw;
+                box-sizing: border-box;
+            }
+            .menu-btn, .ai-btn, button[type="submit"] {
+                width: 100vw;
+                max-width: 100vw;
+                min-width: 0;
+                box-sizing: border-box;
+            }
+            .form-group {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            .resume-card h3 {
+                font-size: 17px;
+            }
+            .resume-card {
+                font-size: 14px;
+                padding: 10px 2vw 8px 2vw;
+            }
+            .card-list {
+                gap: 7px;
+            }
+            .menu-btn {
+                font-size: 15px;
+                padding: 7px 8px;
+            }
+            .ai-btn {
+                font-size: 13px;
+                padding: 7px 8px;
+            }
+            label, .resume-card .label {
+                font-size: 13px;
+            }
+            input, textarea, select {
+                font-size: 13px;
+                padding: 6px 7px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:18px;">
+            <button id="login-btn" class="menu-btn">Войти</button>
+            <button id="register-btn" class="menu-btn">Зарегистрироваться</button>
+            <button id="logout-btn" class="menu-btn hidden">Выйти</button>
+            <span id="user-info" style="margin-left:10px;color:#1976d2;font-weight:600;"></span>
+        </div>
+        <div class="menu">
+            <button class="menu-btn active" id="menu-form">Заполнить анкету</button>
+            <button class="menu-btn" id="menu-list">Сохранённые резюме</button>
+        </div>
+        <div id="form-section">
+            <h1>Форма для заполнения резюме</h1>
+            <div class="ai-freeform">
+                <textarea id="ai-input" placeholder="Введите текст резюме в свободной форме..."></textarea>
+                <button class="ai-btn" id="ai-analyze" py-click="ai_analyze">Распознать и заполнить</button>
+                <div id="ai-result" class="ai-result"></div>
+                <div id="ai-error" class="ai-error"></div>
+            </div>
+            <form id="resume-form" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="fio">ФИО</label>
+                    <input type="text" id="fio">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Номер телефона</label>
+                    <input type="tel" id="phone" pattern="[0-9\-\+\s\(\)]{7,}">
+                </div>
+                <div class="form-group">
+                    <label for="email">Эл. почта</label>
+                    <input type="email" id="email">
+                </div>
+                <div class="form-group">
+                    <label for="goal">Цель поиска работы</label>
+                    <input type="text" id="goal">
+                </div>
+                <div class="form-group">
+                    <label for="position">Должность</label>
+                    <input type="text" id="position">
+                </div>
+                <div class="form-group">
+                    <label for="exp_years">Опыт работы (лет)</label>
+                    <input type="number" id="exp_years" min="0" max="60">
+                </div>
+                <div class="form-group">
+                    <label for="period">Период работы (например, 2020-2023)</label>
+                    <input type="text" id="period">
+                </div>
+                <div class="form-group">
+                    <label for="education">Образование</label>
+                    <select id="education" onchange="document.getElementById('education-other').style.display = this.value === 'Другое' ? 'block' : 'none';">
+                        <option value="">Выберите...</option>
+                        <option value="Высшее">Высшее</option>
+                        <option value="Неоконченное высшее">Неоконченное высшее</option>
+                        <option value="Среднеспециальное">Среднеспециальное</option>
+                        <option value="Среднее">Среднее</option>
+                        <option value="Другое">Другое</option>
+                    </select>
+                    <input type="text" id="education-other" placeholder="Уточните образование" style="display:none; margin-top:6px;" />
+                </div>
+                <div class="form-group">
+                    <label for="hard">Hard skills</label>
+                    <textarea id="hard" placeholder="Перечислите через запятую"></textarea>
+                    <div class="hint">Hard skills — это профессиональные, технические навыки, например: программирование, знание языков, работа с оборудованием.</div>
+                </div>
+                <div class="form-group">
+                    <label for="soft">Soft skills</label>
+                    <textarea id="soft" placeholder="Перечислите через запятую"></textarea>
+                    <div class="hint">Soft skills — это личные, коммуникативные и управленческие навыки, например: коммуникабельность, стрессоустойчивость, умение работать в команде.</div>
+                </div>
+                <div class="form-group">
+                    <label for="relocate">Готовность к переезду</label>
+                    <select id="relocate">
+                        <option value="">Выберите...</option>
+                        <option value="Да">Да</option>
+                        <option value="Нет">Нет</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="certificates">Ссылки на сертификаты</label>
+                    <textarea id="certificates" placeholder="Вставьте ссылки через запятую или с новой строки"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="projects">Ссылки на проекты</label>
+                    <textarea id="projects" placeholder="Вставьте ссылки через запятую или с новой строки"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="hobby">Хобби</label>
+                    <input type="text" id="hobby" autocomplete="off" placeholder="Введите хобби..." />
+                    <div id="hobby-suggestions" style="position:relative;"></div>
+                    <div class="hint">Начните вводить, и появятся подсказки.</div>
+                </div>
+                <div class="form-group">
+                    <label for="portfolio">Ссылка на портфолио</label>
+                    <input type="url" id="portfolio" placeholder="https://..." />
+                </div>
+                <div class="form-group">
+                    <label for="cases">Ссылки на кейсы</label>
+                    <textarea id="cases" placeholder="Вставьте ссылки через запятую или с новой строки"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="video_resume">Ссылки на видео-резюме</label>
+                    <textarea id="video_resume" placeholder="Вставьте ссылки на видео через запятую или с новой строки"></textarea>
+                </div>
+                <button type="submit">Сохранить резюме</button>
+            </form>
+        </div>
+        <div id="list-section" class="hidden">
+            <h1>Сохранённые резюме</h1>
+            <div id="output-table"></div>
+        </div>
+    </div>
+    <!-- Модальное окно для полной анкеты -->
+    <div id="modal-overlay" style="display:none;position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:rgba(44,62,80,0.65);justify-content:center;align-items:center;">
+        <div id="modal-content" style="background:#fff;border-radius:12px;max-width:600px;width:90vw;max-height:90vh;overflow:auto;box-shadow:0 8px 32px rgba(0,0,0,0.18);padding:32px 24px;position:relative;">
+            <button id="modal-close" style="position:absolute;top:16px;right:16px;font-size:22px;background:none;border:none;cursor:pointer;">&times;</button>
+            <div id="modal-body"></div>
+            <div class="export-menu show" style="margin-top: 20px;">
+                <button class="export-menu-btn" onclick="exportToPDF(modalData)">Экспортировать в PDF</button>
+                <button class="export-menu-btn hhru" onclick="exportToHHRU(modalData)">Экспортировать на hh.ru</button>
+            </div>
+        </div>
+    </div>
+    <!-- Модальное окно для логина/регистрации -->
+    <div id="auth-modal" style="display:none;position:fixed;z-index:2000;top:0;left:0;width:100vw;height:100vh;background:rgba(44,62,80,0.65);justify-content:center;align-items:center;">
+        <div style="background:#fff;border-radius:12px;max-width:350px;width:90vw;padding:32px 24px;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+            <button id="auth-close" style="position:absolute;top:16px;right:16px;font-size:22px;background:none;border:none;cursor:pointer;">&times;</button>
+            <h2 id="auth-title" style="margin-top:0;"></h2>
+            <form id="auth-form">
+                <div class="form-group"><label for="auth-login">Логин</label><input type="text" id="auth-login" required></div>
+                <div class="form-group"><label for="auth-password">Пароль</label><input type="password" id="auth-password" required></div>
+                <button type="submit" class="ai-btn" style="width:100%;margin-top:12px;">OK</button>
+                <div id="auth-error" class="ai-error"></div>
+            </form>
+        </div>
+    </div>
+    <!-- Модальное окно для восстановления пароля -->
+    <div id="forgot-modal">
+        <div>
+            <button id="forgot-close" style="position:absolute;top:16px;right:16px;font-size:22px;background:none;border:none;cursor:pointer;">&times;</button>
+            <h2 style="margin-top:0;">Восстановление пароля</h2>
+            <form id="forgot-form">
+                <div class="form-group"><label for="forgot-login">Логин</label><input type="text" id="forgot-login" required></div>
+                <div class="form-group"><label for="forgot-email">Email</label><input type="email" id="forgot-email" required></div>
+                <div class="form-group hidden" id="forgot-newpass-group"><label for="forgot-newpass">Новый пароль</label><input type="password" id="forgot-newpass"></div>
+                <button type="submit" class="ai-btn" style="width:100%;margin-top:12px;">Восстановить</button>
+                <div id="forgot-error" class="ai-error"></div>
+                <div id="forgot-success" style="color:#388e3c;margin-top:8px;"></div>
+            </form>
+        </div>
+    </div>
+    <!-- Всплывающее уведомление -->
+    <div id="resume-toast" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1976d2;color:#fff;padding:16px 32px;border-radius:8px;font-size:18px;z-index:3000;box-shadow:0 4px 24px rgba(0,0,0,0.12);transition:opacity 0.3s;opacity:0;"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.18.0/dist/tf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.3.0/docx.umd.js"></script>
+    <script>
+    // --- Данные и функции для резюме ---
+    const submissions = [];
+    let currentUser = null;
+    let users = {};
+    let modalData = null; // Для хранения данных в модальном окне
+    
+    // --- LocalStorage helpers ---
+    function loadUsers() {
+        try { users = JSON.parse(localStorage.getItem('users')||'{}'); } catch { users = {}; }
+    }
+    function saveUsers() {
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+    function setCurrentUser(login) {
+        currentUser = login;
+        localStorage.setItem('currentUser', login||'');
+    }
+    function getCurrentUser() {
+        return localStorage.getItem('currentUser')||null;
+    }
+    function updateUserInfo() {
+        document.getElementById('user-info').textContent = currentUser ? `Пользователь: ${currentUser}` : '';
+        document.getElementById('login-btn').classList.toggle('hidden', !!currentUser);
+        document.getElementById('register-btn').classList.toggle('hidden', !!currentUser);
+        document.getElementById('logout-btn').classList.toggle('hidden', !currentUser);
+    }
+    
+    // --- AUTH MODAL ---
+    const authModal = document.getElementById('auth-modal');
+    const authForm = document.getElementById('auth-form');
+    const authTitle = document.getElementById('auth-title');
+    const authError = document.getElementById('auth-error');
+    let authMode = 'login';
+    
+    document.getElementById('login-btn').onclick = function() {
+        authMode = 'login';
+        authTitle.textContent = 'Вход';
+        authError.textContent = '';
+        authModal.style.display = 'flex';
+    };
+    document.getElementById('register-btn').onclick = function() {
+        authMode = 'register';
+        authTitle.textContent = 'Регистрация';
+        authError.textContent = '';
+        authModal.style.display = 'flex';
+    };
+    document.getElementById('auth-close').onclick = function() {
+        authModal.style.display = 'none';
+    };
+    authModal.addEventListener('click', function(e) { if (e.target === this) authModal.style.display = 'none'; });
+    document.getElementById('logout-btn').onclick = function() {
+        setCurrentUser(null);
+        updateUserInfo();
+        updateList();
+        alert('Вы вышли из аккаунта.');
+    };
+    
+    // --- FORGOT PASSWORD MODAL ---
+    const forgotModal = document.getElementById('forgot-modal');
+    const forgotForm = document.getElementById('forgot-form');
+    const forgotError = document.getElementById('forgot-error');
+    const forgotSuccess = document.getElementById('forgot-success');
+    const forgotNewPassGroup = document.getElementById('forgot-newpass-group');
+    let forgotStep = 1;
+    
+    document.getElementById('forgot-close').onclick = function() { 
+        forgotModal.style.display = 'none'; 
+        forgotForm.reset(); 
+        forgotError.textContent=''; 
+        forgotSuccess.textContent=''; 
+        forgotNewPassGroup.classList.add('hidden'); 
+        forgotStep=1; 
+    };
+    forgotModal.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
+    
+    document.getElementById('forgot-form').onsubmit = function(e) {
+        e.preventDefault();
+        loadUsers();
+        const login = document.getElementById('forgot-login').value.trim();
+        const email = document.getElementById('forgot-email').value.trim();
+        if (forgotStep === 1) {
+            if (!users[login]) { forgotError.textContent = 'Пользователь не найден.'; return; }
+            if (users[login].email !== email) { forgotError.textContent = 'Email не совпадает.'; return; }
+            forgotError.textContent = '';
+            forgotSuccess.textContent = 'Email подтверждён. Введите новый пароль.';
+            forgotNewPassGroup.classList.remove('hidden');
+            forgotStep = 2;
+        } else if (forgotStep === 2) {
+            const newpass = document.getElementById('forgot-newpass').value;
+            if (!newpass) { forgotError.textContent = 'Введите новый пароль.'; return; }
+            users[login].password = newpass;
+            saveUsers();
+            forgotSuccess.textContent = 'Пароль успешно изменён! Теперь вы можете войти.';
+            setTimeout(()=>{
+                forgotModal.style.display='none';
+                forgotForm.reset();
+                forgotError.textContent='';
+                forgotSuccess.textContent='';
+                forgotNewPassGroup.classList.add('hidden');
+                forgotStep=1;
+            }, 1500);
+        }
+    };
+    
+    // --- FORGOT PASSWORD LINK ---
+    let forgotLink = document.createElement('div');
+    forgotLink.innerHTML = '<a href="#" id="forgot-link" style="color:#1976d2;font-size:15px;display:block;text-align:right;margin-top:4px;">Забыли пароль?</a>';
+    document.getElementById('auth-form').appendChild(forgotLink);
+    document.getElementById('forgot-link').onclick = function(e) {
+        e.preventDefault();
+        authModal.style.display = 'none';
+        forgotModal.style.display = 'flex';
+        forgotForm.reset();
+        forgotError.textContent = '';
+        forgotSuccess.textContent = '';
+        forgotNewPassGroup.classList.add('hidden');
+        forgotStep = 1;
+    };
+    
+    // --- Автодополнение для хобби ---
+    const hobbyList = [
+        'Чтение', 'Путешествия', 'Спорт', 'Фотография', 'Рисование', 'Музыка', 'Танцы', 'Волонтёрство', 'Кулинария', 'Видеоигры',
+        'Программирование', 'Настольные игры', 'Рукоделие', 'Пение', 'Йога', 'Блогинг', 'Рыбалка', 'Велоспорт', 'Плавание', 'Театр',
+        'Кино', 'Садоводство', 'Коллекционирование', 'Шахматы', 'Путешествия на природу', 'Готовка', 'Изучение языков', 'Моделизм', 'Скалолазание', 'Пешие прогулки'
+    ];
+    const hobbyInput = document.getElementById('hobby');
+    const hobbySuggestions = document.getElementById('hobby-suggestions');
+    
+    hobbyInput.addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        hobbySuggestions.innerHTML = '';
+        if (!value) return;
+        const matches = hobbyList.filter(h => h.toLowerCase().startsWith(value)).slice(0, 5);
+        if (matches.length) {
+            const list = document.createElement('ul');
+            list.className = 'autocomplete-suggestions';
+            matches.forEach(hobby => {
+                const item = document.createElement('li');
+                item.textContent = hobby;
+                item.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    hobbyInput.value = hobby;
+                    hobbySuggestions.innerHTML = '';
+                });
+                list.appendChild(item);
+            });
+            hobbySuggestions.appendChild(list);
+        }
+    });
+    hobbyInput.addEventListener('blur', function() {
+        setTimeout(() => hobbySuggestions.innerHTML = '', 100);
+    });
+    
+    // --- Автодополнение для hard skills ---
+    const hardSkillsList = [
+        'Python', 'JavaScript', 'HTML', 'CSS', 'SQL', 'C++', 'Java', 'React', 'Node.js', 'Django', 'Flask', 'Git', 'Linux', 'Docker', 'Kubernetes',
+        'Machine Learning', 'Data Analysis', 'Excel', '1C', 'Photoshop', 'AutoCAD', 'Figma', 'Unity', 'Unreal Engine', 'C#', 'PHP', 'Go', 'Swift', 'Kotlin',
+        'Project Management', 'SEO', 'SMM', 'Бухгалтерия', 'Продажи', 'Тестирование', 'DevOps', 'Аналитика', 'Веб-разработка', 'Мобильная разработка', '3D-моделирование',
+        'Ведение переговоров (B2B/B2G)', 'Анализ P&L отчетности', 'Работа с CRM (Bitrix24, AmoCRM)', 'Продвинутый Excel (сводные таблицы, VLOOKUP)'
+    ];
+    const hardInput = document.getElementById('hard');
+    let hardSuggestions = document.createElement('div');
+    hardInput.parentNode.appendChild(hardSuggestions);
+    hardSuggestions.style.position = 'relative';
+    
+    hardInput.addEventListener('input', function() {
+        const value = this.value.split(',').pop().trim().toLowerCase();
+        hardSuggestions.innerHTML = '';
+        if (!value) return;
+        const matches = hardSkillsList.filter(skill => skill.toLowerCase().startsWith(value) && !this.value.toLowerCase().split(',').map(s=>s.trim()).includes(skill.toLowerCase())).slice(0, 7);
+        if (matches.length) {
+            const list = document.createElement('ul');
+            list.className = 'autocomplete-suggestions';
+            matches.forEach(skill => {
+                const item = document.createElement('li');
+                item.textContent = skill;
+                item.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    let current = hardInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+                    current.pop();
+                    current.push(skill);
+                    hardInput.value = current.join(', ') + ', ';
+                    hardSuggestions.innerHTML = '';
+                });
+                list.appendChild(item);
+            });
+            hardSuggestions.appendChild(list);
+        }
+    });
+    hardInput.addEventListener('blur', function() {
+        setTimeout(() => hardSuggestions.innerHTML = '', 100);
+    });
+    
+    // --- Автодополнение для soft skills ---
+    const softSkillsList = [
+        'Коммуникабельность', 'Стрессоустойчивость', 'Работа в команде', 'Лидерство', 'Тайм-менеджмент', 'Креативность', 'Адаптивность',
+        'Ответственность', 'Самоорганизация', 'Обучаемость', 'Критическое мышление', 'Публичные выступления', 'Управление конфликтами',
+        'Эмпатия', 'Гибкость', 'Внимательность', 'Дисциплина', 'Мотивация', 'Наставничество', 'Дипломатичность', 'Планирование', 'Решение проблем',
+        'Аналитическое мышление', 'Переговоры', 'Самомотивация', 'Управление временем', 'Организованность', 'Клиентоориентированность',
+        'Лидерство (управлял командой 12+)', 'Эмоциональный интеллект (разрешение конфликтов)', 'Тайм-менеджмент (работа с 50+ клиентами)', 'Критическое мышление'
+    ];
+    const softInput = document.getElementById('soft');
+    let softSuggestions = document.createElement('div');
+    softInput.parentNode.appendChild(softSuggestions);
+    softSuggestions.style.position = 'relative';
+    
+    softInput.addEventListener('input', function() {
+        const value = this.value.split(',').pop().trim().toLowerCase();
+        softSuggestions.innerHTML = '';
+        if (!value) return;
+        const matches = softSkillsList.filter(skill => skill.toLowerCase().startsWith(value) && !this.value.toLowerCase().split(',').map(s=>s.trim()).includes(skill.toLowerCase())).slice(0, 7);
+        if (matches.length) {
+            const list = document.createElement('ul');
+            list.className = 'autocomplete-suggestions';
+            matches.forEach(skill => {
+                const item = document.createElement('li');
+                item.textContent = skill;
+                item.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    let current = softInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+                    current.pop();
+                    current.push(skill);
+                    softInput.value = current.join(', ') + ', ';
+                    softSuggestions.innerHTML = '';
+                });
+                list.appendChild(item);
+            });
+            softSuggestions.appendChild(list);
+        }
+    });
+    softInput.addEventListener('blur', function() {
+        setTimeout(() => softSuggestions.innerHTML = '', 100);
+    });
+    
+    // --- Переключение меню ---
+    const menuForm = document.getElementById('menu-form');
+    const menuList = document.getElementById('menu-list');
+    const formSection = document.getElementById('form-section');
+    const listSection = document.getElementById('list-section');
+    
+    menuForm.addEventListener('click', () => {
+        menuForm.classList.add('active');
+        menuList.classList.remove('active');
+        formSection.classList.remove('hidden');
+        listSection.classList.add('hidden');
+    });
+    menuList.addEventListener('click', () => {
+        menuForm.classList.remove('active');
+        menuList.classList.add('active');
+        formSection.classList.add('hidden');
+        listSection.classList.remove('hidden');
+        updateList();
+    });
+
+    // --- Сохранение формы ---
+    document.getElementById('resume-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = {
+            fio: document.getElementById('fio').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value,
+            goal: document.getElementById('goal').value,
+            position: document.getElementById('position').value,
+            exp_years: document.getElementById('exp_years').value,
+            period: document.getElementById('period').value,
+            education: document.getElementById('education').value === 'Другое' ? document.getElementById('education-other').value : document.getElementById('education').value,
+            hard: document.getElementById('hard').value,
+            soft: document.getElementById('soft').value,
+            relocate: document.getElementById('relocate').value,
+            certificates: document.getElementById('certificates').value,
+            projects: document.getElementById('projects').value,
+            hobby: document.getElementById('hobby').value,
+            portfolio: document.getElementById('portfolio').value,
+            cases: document.getElementById('cases').value,
+            video_resume: document.getElementById('video_resume').value
+        };
+        saveResume(data);
+        this.reset();
+        updateList();
+        showResumeToast('Резюме успешно сохранено!');
+    });
+
+    // --- Отслеживание ручного изменения полей ---
+    const formFields = ['fio','phone','email','goal','position','exp_years','period','education','hard','soft','relocate','certificates','projects','hobby','portfolio','cases','video_resume'];
+    const userEdited = {};
+    formFields.forEach(id => {
+        userEdited[id] = false;
+        document.getElementById(id).addEventListener('input', () => {
+            userEdited[id] = true;
+        });
+    });
+
+    // --- AI автозаполнение с TensorFlow.js (эвристики для произвольного текста) ---
+    async function aiAnalyze(text) {
+        const result = {
+            fio: '',
+            phone: '',
+            email: '',
+            goal: '',
+            position: '',
+            exp_years: '',
+            period: '',
+            education: '',
+            hard: '',
+            soft: '',
+            relocate: '',
+            certificates: '',
+            projects: '',
+            hobby: '',
+            portfolio: '',
+            cases: '',
+            video_resume: ''
+        };
+        
+        // ФИО: три слова с большой буквы (русские буквы)
+        const fioMatch = text.match(/([А-ЯЁ][а-яё]+\s+[А-ЯЁ][а-яё]+\s+[А-ЯЁ][а-яё]+)/);
+        if (fioMatch) result.fio = fioMatch[1];
+        
+        // Email
+        const emailMatch = text.match(/[\w.-]+@[\w.-]+/);
+        if (emailMatch) result.email = emailMatch[0];
+        
+        // Телефон
+        const phoneMatch = text.match(/(\+7|8)?[\s\-]?(\(?\d{3}\)?[\s\-]?)?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}/);
+        if (phoneMatch) result.phone = phoneMatch[0];
+        
+        // Должность
+        const positionMatch = text.match(/(должность|позиция|работал[а]?|работаю|стаж|опыт работы|менеджер|разработчик|инженер|программист|директор|бухгалтер|учитель|врач|юрист|дизайнер|аналитик|маркетолог|продавец|оператор|специалист|консультант|ассистент|руководитель|начальник|администратор|project manager|developer|engineer|designer|analyst|teacher|doctor|lawyer|accountant|manager|director|sales|consultant|assistant|lead|chief|head)[^\n\r,;:.]*[\n\r,;:.]?/i);
+        if (positionMatch) result.position = positionMatch[0].replace(/(должность|позиция|работал[а]?|работаю|стаж|опыт работы|:)/i, '').trim();
+        
+        // Опыт (лет)
+        const expMatch = text.match(/(\d{1,2})\s*(год(а|ов)?|лет|года|years?)/i);
+        if (expMatch) result.exp_years = expMatch[1];
+        
+        // Период
+        const periodMatch = text.match(/(\d{4})\s*[-–—]\s*(\d{4}|наст\.?\s*время|present)/i);
+        if (periodMatch) result.period = periodMatch[0];
+        
+        // Образование
+        const eduMatch = text.match(/(высшее|неоконченное высшее|среднеспециальное|среднее|другое|бакалавр|магистр|аспирант|кандидат наук|доктор наук|PhD|Bachelor|Master|Specialist|High school|Other)/i);
+        if (eduMatch) result.education = eduMatch[0];
+        
+        // Hard skills (по ключевым словам)
+        const hardMatch = text.match(/(hard skills|технические навыки|профессиональные навыки|навыки:|умения:|skills:|Навыки:|Hard skills:|Профессиональные навыки:)[^\n\r]*/i);
+        let hardArr = [];
+        if (hardMatch) {
+            let hardStr = hardMatch[0].replace(/(hard skills|технические навыки|профессиональные навыки|навыки:|умения:|skills:|Навыки:|Hard skills:|Профессиональные навыки:)/i, '').trim();
+            hardArr = hardStr.split(/[\,;:\-\n\r]+/).map(s => s.trim()).filter(Boolean);
+        }
+        
+        // Soft skills (по ключевым словам)
+        const softMatch = text.match(/(soft skills|личные качества|гибкие навыки|soft:|Soft skills:|Личные качества:|Гибкие навыки:)[^\n\r]*/i);
+        let softArr = [];
+        if (softMatch) {
+            let softStr = softMatch[0].replace(/(soft skills|личные качества|гибкие навыки|soft:|Soft skills:|Личные качества:|Гибкие навыки:)/i, '').trim();
+            softArr = softStr.split(/[\,;:\-\n\r]+/).map(s => s.trim()).filter(Boolean);
+        }
+        
+        // --- ДОБАВЛЯЕМ: поиск известных навыков из списков ---
+        if (typeof hardSkillsList !== 'undefined') {
+            hardSkillsList.forEach(skill => {
+                // ищем навык как отдельное слово или с пояснением
+                const re = new RegExp('(^|[^а-яa-z0-9])' + skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^а-яa-z0-9]|$)', 'i');
+                if (re.test(text) && !hardArr.includes(skill)) hardArr.push(skill);
+            });
+        }
+        if (typeof softSkillsList !== 'undefined') {
+            softSkillsList.forEach(skill => {
+                const re = new RegExp('(^|[^а-яa-z0-9])' + skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^а-яa-z0-9]|$)', 'i');
+                if (re.test(text) && !softArr.includes(skill)) softArr.push(skill);
+            });
+        }
+        result.hard = hardArr.join(', ');
+        result.soft = softArr.join(', ');
+        
+        // Готовность к переезду
+        const relocateMatch = text.match(/(готов(а)? к переезду|готов(а)? к командировкам|relocat(e|ion)|переезд)/i);
+        if (relocateMatch) result.relocate = 'Да';
+        
+        // Цель поиска работы
+        const goalMatch = text.match(/(цель|ищу|стремлюсь|хочу|интересует|goal|objective|looking for|seeking)[^\n\r]*/i);
+        if (goalMatch) result.goal = goalMatch[0].replace(/(цель|ищу|стремлюсь|хочу|интересует|goal|objective|looking for|seeking)/i, '').trim();
+        
+        // Сертификаты
+        const certificatesMatch = text.match(/(сертификаты|certificates|certifications|сертификации|certificates:|Certifications:)[^\n\r]*/i);
+        if (certificatesMatch) {
+            let certificatesStr = certificatesMatch[0].replace(/(сертификаты|certificates|certifications|сертификации|certificates:|Certifications:)/i, '').trim();
+            let certificatesArr = certificatesStr.split(/[\,;:\-\n\r]+/).map(s => s.trim()).filter(Boolean);
+            result.certificates = certificatesArr.join(', ');
+        }
+        
+        // Проекты
+        const projectsMatch = text.match(/(проекты|projects|project|проект|projects:|Project:)[^\n\r]*/i);
+        if (projectsMatch) {
+            let projectsStr = projectsMatch[0].replace(/(проекты|projects|project|проект|projects:|Project:)/i, '').trim();
+            let projectsArr = projectsStr.split(/[\,;:\-\n\r]+/).map(s => s.trim()).filter(Boolean);
+            result.projects = projectsArr.join(', ');
+        }
+        
+        // Хобби
+        const hobbyMatch = text.match(/(хобби|hobby|hobbies|увлечения|interests|interests:|Hobbies:|Увлечения:)[^\n\r]*/i);
+        if (hobbyMatch) {
+            let hobbyStr = hobbyMatch[0].replace(/(хобби|hobby|hobbies|увлечения|interests|interests:|Hobbies:|Увлечения:)/i, '').trim();
+            let hobbyArr = hobbyStr.split(/[\,;:\-\n\r]+/).map(s => s.trim()).filter(Boolean);
+            result.hobby = hobbyArr.join(', ');
+        }
+        
+        // Портфолио
+        const portfolioMatch = text.match(/(портфолио|portfolio|Portfolio:)[^\n\r]*/i);
+        if (portfolioMatch) {
+            let portfolioStr = portfolioMatch[0].replace(/(портфолио|portfolio|Portfolio:)/i, '').trim();
+            result.portfolio = portfolioStr;
+        }
+        
+        // Кейсы
+        const casesMatch = text.match(/(кейсы|cases|Cases:)[^\n\r]*/i);
+        if (casesMatch) {
+            let casesStr = casesMatch[0].replace(/(кейсы|cases|Cases:)/i, '').trim();
+            result.cases = casesStr;
+        }
+        
+        // Видео-резюме
+        const videoMatch = text.match(/(видео-резюме|video resume|Video Resume:)[^\n\r]*/i);
+        if (videoMatch) {
+            let videoStr = videoMatch[0].replace(/(видео-резюме|video resume|Video Resume:)/i, '').trim();
+            result.video_resume = videoStr;
+        }
+        
+        return result;
+    }
+
+    document.getElementById('ai-analyze').addEventListener('click', async function() {
+        const input = document.getElementById('ai-input').value;
+        const resultDiv = document.getElementById('ai-result');
+        const errorDiv = document.getElementById('ai-error');
+        resultDiv.textContent = '';
+        errorDiv.textContent = '';
+        
+        if (!input.trim()) {
+            errorDiv.textContent = 'Введите текст для анализа.';
+            return;
+        }
+        
+        resultDiv.textContent = 'Анализируем...';
+        try {
+            const data = await aiAnalyze(input);
+            // Заполняем только те поля, для которых есть результат и которые не были изменены вручную
+            if (data.fio && !userEdited['fio']) document.getElementById('fio').value = data.fio;
+            if (data.phone && !userEdited['phone']) document.getElementById('phone').value = data.phone;
+            if (data.email && !userEdited['email']) document.getElementById('email').value = data.email;
+            if (data.goal && !userEdited['goal']) document.getElementById('goal').value = data.goal;
+            if (data.position && !userEdited['position']) document.getElementById('position').value = data.position;
+            if (data.exp_years && !userEdited['exp_years']) document.getElementById('exp_years').value = data.exp_years;
+            if (data.period && !userEdited['period']) document.getElementById('period').value = data.period;
+            if (data.education && !userEdited['education']) document.getElementById('education').value = data.education;
+            if (data.hard && !userEdited['hard']) document.getElementById('hard').value = data.hard;
+            if (data.soft && !userEdited['soft']) document.getElementById('soft').value = data.soft;
+            if (data.relocate && !userEdited['relocate']) document.getElementById('relocate').value = data.relocate;
+            if (data.certificates && !userEdited['certificates']) document.getElementById('certificates').value = data.certificates;
+            if (data.projects && !userEdited['projects']) document.getElementById('projects').value = data.projects;
+            if (data.hobby && !userEdited['hobby']) document.getElementById('hobby').value = data.hobby;
+            if (data.portfolio && !userEdited['portfolio']) document.getElementById('portfolio').value = data.portfolio;
+            if (data.cases && !userEdited['cases']) document.getElementById('cases').value = data.cases;
+            if (data.video_resume && !userEdited['video_resume']) document.getElementById('video_resume').value = data.video_resume;
+            resultDiv.textContent = 'Автозаполнение завершено.';
+        } catch (e) {
+            errorDiv.textContent = 'Ошибка анализа: ' + e.message;
+        }
+    });
+
+    // --- Восстановление работы модального окна анкеты и списка ---
+    function updateList() {
+        const output = document.getElementById("output-table");
+        let resumes = [];
+        if (!currentUser) {
+            // Гостевой режим
+            try { resumes = JSON.parse(localStorage.getItem('guestResumes')||'[]'); } catch { resumes = []; }
+        } else {
+            loadUsers();
+            resumes = (users[currentUser] && users[currentUser].submissions) ? users[currentUser].submissions : [];
+        }
+        
+        if (!resumes.length) {
+            output.innerHTML = '<p class="center">Нет сохранённых резюме</p>';
+            return;
+        }
+        
+        let html = '<div class="card-list">';
+        resumes.forEach((r, idx) => {
+            html += `
+            <div class="resume-card">
+                <button class="delete-resume-btn" data-idx="${idx}" title="Удалить">-</button>
+                <h3>${r.fio || r.email || 'Без имени'}</h3>
+                <div class="card-row"><span class="label">Телефон:</span> <span class="value">${r.phone || ''}</span></div>
+                <div class="card-row"><span class="label">Email:</span> <span class="value">${r.email || ''}</span></div>
+                <div class="card-row"><span class="label">Должность:</span> <span class="value">${r.position || ''}</span></div>
+                <div class="card-row"><span class="label">Опыт:</span> <span class="value">${r.exp_years || ''} лет</span></div>
+                <div class="card-row"><span class="label">Период:</span> <span class="value">${r.period || ''}</span></div>
+                <div class="card-row"><span class="label">Образование:</span> <span class="value">${r.education || ''}</span></div>
+                <div class="card-row"><span class="label">Цель:</span> <span class="value">${r.goal || ''}</span></div>
+                <div class="card-row"><span class="label">Hard skills:</span> <span class="skills">${r.hard || ''}</span></div>
+                <div class="card-row"><span class="label">Soft skills:</span> <span class="soft">${r.soft || ''}</span></div>
+                <div class="card-row"><span class="label">Переезд:</span> <span class="value">${r.relocate === 'Да' ? 'Да' : 'Нет'}</span></div>
+                <div class="card-row"><span class="label">Сертификаты:</span> <span class="value">${r.certificates || ''}</span></div>
+                <div class="card-row"><span class="label">Проекты:</span> <span class="value">${r.projects || ''}</span></div>
+                <div class="card-row"><span class="label">Портфолио:</span> <span class="value">${r.portfolio || ''}</span></div>
+                <div class="card-row"><span class="label">Кейсы:</span> <span class="value">${r.cases || ''}</span></div>
+                <div class="card-row"><span class="label">Видео-резюме:</span> <span class="value">${r.video_resume || ''}</span></div>
+                <div class="card-row"><span class="label">Хобби:</span> <span class="value">${r.hobby || ''}</span></div>
+                
+                <button class="expand-btn" data-idx="${idx}">Развернуть</button>
+                <div class="export-menu" id="export-menu-${idx}">
+                    <button class="export-menu-btn" onclick="exportToPDF(${encodeURIComponent(JSON.stringify(r))})">Экспортировать в PDF</button>
+                    <button class="export-menu-btn hhru" onclick="exportToHHRU(${encodeURIComponent(JSON.stringify(r))})">Экспортировать на hh.ru</button>
+                </div>
+            </div>
+            `;
+        });
+        html += '</div>';
+        output.innerHTML = html;
+        
+        // Навешиваем обработчики на кнопки "Развернуть"
+        document.querySelectorAll('.expand-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = this.getAttribute('data-idx');
+                const exportMenu = document.getElementById(`export-menu-${idx}`);
+                
+                // Переключаем видимость меню экспорта
+                if (exportMenu.classList.contains('show')) {
+                    exportMenu.classList.remove('show');
+                    this.textContent = 'Развернуть';
+                } else {
+                    // Скрываем все остальные меню
+                    document.querySelectorAll('.export-menu').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                    document.querySelectorAll('.expand-btn').forEach(otherBtn => {
+                        otherBtn.textContent = 'Развернуть';
+                    });
+                    
+                    // Показываем текущее меню
+                    exportMenu.classList.add('show');
+                    this.textContent = 'Свернуть';
+                }
+            });
+        });
+        
+        // Обработчик удаления резюме
+        document.querySelectorAll('.delete-resume-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const idx = parseInt(this.getAttribute('data-idx'));
+                if (!isNaN(idx)) {
+                    if (!currentUser) {
+                        // Гостевой режим
+                        let guestResumes = [];
+                        try { guestResumes = JSON.parse(localStorage.getItem('guestResumes')||'[]'); } catch { guestResumes = []; }
+                        guestResumes.splice(idx, 1);
+                        localStorage.setItem('guestResumes', JSON.stringify(guestResumes));
+                    } else {
+                        loadUsers();
+                        if (users[currentUser] && users[currentUser].submissions) {
+                            users[currentUser].submissions.splice(idx, 1);
+                            saveUsers();
+                        }
+                    }
+                    updateList();
+                    showResumeToast('Резюме удалено');
+                }
+            });
+        });
+    }
+
+    // --- Модальное окно ---
+    function showModal(data) {
+        modalData = data; // Сохраняем данные для использования в кнопках экспорта
+        const modal = document.getElementById('modal-overlay');
+        const body = document.getElementById('modal-body');
+        body.innerHTML = `
+            <h2 style="margin-top:0;">${data.fio || data.email || 'Без имени'}</h2>
+            <div style="margin-bottom:10px;"><b>Телефон:</b> ${data.phone || ''}</div>
+            <div style="margin-bottom:10px;"><b>Email:</b> ${data.email || ''}</div>
+            <div style="margin-bottom:10px;"><b>Должность:</b> ${data.position || ''}</div>
+            <div style="margin-bottom:10px;"><b>Опыт работы:</b> ${data.exp_years || ''} лет</div>
+            <div style="margin-bottom:10px;"><b>Период работы:</b> ${data.period || ''}</div>
+            <div style="margin-bottom:10px;"><b>Образование:</b> ${data.education || ''}</div>
+            <div style="margin-bottom:10px;"><b>Цель поиска работы:</b> ${data.goal || ''}</div>
+            <div style="margin-bottom:10px;"><b>Hard skills:</b> ${data.hard || ''}</div>
+            <div style="margin-bottom:10px;"><b>Soft skills:</b> ${data.soft || ''}</div>
+            <div style="margin-bottom:10px;"><b>Готовность к переезду:</b> ${data.relocate === 'Да' ? 'Да' : 'Нет'}</div>
+            <div style="margin-bottom:10px;"><b>Сертификаты:</b> ${data.certificates || ''}</div>
+            <div style="margin-bottom:10px;"><b>Проекты:</b> ${data.projects || ''}</div>
+            <div style="margin-bottom:10px;"><b>Портфолио:</b> ${data.portfolio || ''}</div>
+            <div style="margin-bottom:10px;"><b>Кейсы:</b> ${data.cases || ''}</div>
+            <div style="margin-bottom:10px;"><b>Видео-резюме:</b> ${data.video_resume || ''}</div>
+            <div style="margin-bottom:10px;"><b>Хобби:</b> ${data.hobby || ''}</div>
+        `;
+        modal.style.display = 'flex';
+    }
+    
+    document.getElementById('modal-close').onclick = function() {
+        document.getElementById('modal-overlay').style.display = 'none';
+    };
+    
+    // Закрытие по клику вне окна
+    document.getElementById('modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+
+    // --- Сохранение резюме ---
+    function saveResume(data) {
+        if (!currentUser) {
+            // Гостевой режим: сохраняем в localStorage
+            let guestResumes = [];
+            try { guestResumes = JSON.parse(localStorage.getItem('guestResumes')||'[]'); } catch { guestResumes = []; }
+            guestResumes.push(data);
+            localStorage.setItem('guestResumes', JSON.stringify(guestResumes));
+        } else {
+            loadUsers();
+            if (!users[currentUser]) users[currentUser] = { password: '', email: '', submissions: [] };
+            users[currentUser].submissions.push(data);
+            saveUsers();
+        }
+    }
+
+    // --- Всплывающее уведомление о сохранении ---
+    function showResumeToast(msg) {
+        const toast = document.getElementById('resume-toast');
+        toast.textContent = msg;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.opacity = '1'; }, 10);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => { toast.style.display = 'none'; }, 400);
+        }, 1800);
+    }
+
+    // --- Функции экспорта ---
+    function exportToPDF(dataStr) {
+        const data = JSON.parse(decodeURIComponent(dataStr));
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        let y = 15;
+        
+        doc.setFontSize(18);
+        doc.text(data.fio || 'Без имени', 10, y);
+        y += 12;
+        doc.setFontSize(12);
+        
+        const fields = [
+            ['Телефон', data.phone],
+            ['Email', data.email],
+            ['Должность', data.position],
+            ['Опыт работы', (data.exp_years ? data.exp_years + ' лет' : '')],
+            ['Период работы', data.period],
+            ['Образование', data.education],
+            ['Цель поиска работы', data.goal],
+            ['Hard skills', data.hard],
+            ['Soft skills', data.soft],
+            ['Готовность к переезду', data.relocate === 'Да' ? 'Да' : 'Нет'],
+            ['Сертификаты', data.certificates],
+            ['Проекты', data.projects],
+            ['Портфолио', data.portfolio],
+            ['Кейсы', data.cases],
+            ['Видео-резюме', data.video_resume],
+            ['Хобби', data.hobby],
+        ];
+        
+        fields.forEach(([label, value]) => {
+            if (value) {
+                const lines = doc.splitTextToSize(label + ': ' + value, 180);
+                doc.text(lines, 10, y);
+                y += lines.length * 7 + 2;
+                if (y > 280) { doc.addPage(); y = 15; }
+            }
+        });
+        
+        showResumeToast('Файл ' + (data.fio||'resume')+'.pdf скачивается...');
+        doc.save((data.fio||'resume')+'.pdf');
+    }
+
+    function exportToHHRU(dataStr) {
+        const data = JSON.parse(decodeURIComponent(dataStr));
+        
+        // Создаем DOCX файл для загрузки на hh.ru
+        const doc = new window.docx.Document({
+            sections: [{
+                properties: {},
+                children: [
+                    new window.docx.Paragraph({
+                        text: data.fio || 'Без имени',
+                        heading: window.docx.HeadingLevel.HEADING_1,
+                        spacing: { after: 200 }
+                    }),
+                    ...[
+                        ['Телефон', data.phone],
+                        ['Email', data.email],
+                        ['Должность', data.position],
+                        ['Опыт работы', (data.exp_years ? data.exp_years + ' лет' : '')],
+                        ['Период работы', data.period],
+                        ['Образование', data.education],
+                        ['Цель поиска работы', data.goal],
+                        ['Hard skills', data.hard],
+                        ['Soft skills', data.soft],
+                        ['Готовность к переезду', data.relocate === 'Да' ? 'Да' : 'Нет'],
+                        ['Сертификаты', data.certificates],
+                        ['Проекты', data.projects],
+                        ['Портфолио', data.portfolio],
+                        ['Кейсы', data.cases],
+                        ['Видео-резюме', data.video_resume],
+                        ['Хобби', data.hobby],
+                    ].filter(([label, value]) => value).map(([label, value]) =>
+                        new window.docx.Paragraph({
+                            spacing: { after: 120 },
+                            children: [
+                                new window.docx.TextRun({ text: label + ': ', bold: true }),
+                                ...String(value).split(/\r?\n|, /g).map((part, idx, arr) =>
+                                    [
+                                        new window.docx.TextRun({ text: part }),
+                                        idx < arr.length - 1 ? new window.docx.TextRun({ text: ', ', break: 0 }) : null
+                                    ]
+                                ).flat().filter(Boolean)
+                            ]
+                        })
+                    )
+                ]
+            }]
+        });
+        
+        window.docx.Packer.toBlob(doc).then(blob => {
+            const filename = (data.fio||'resume')+'-hhru.docx';
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => { document.body.removeChild(link); }, 100);
+
+            // После скачивания открываем hh.ru в новой вкладке
+            setTimeout(() => {
+                window.open('https://hh.ru/applicant/resumes/import', '_blank');
+                showResumeToast('Файл скачан! Откройте hh.ru для загрузки резюме.');
+            }, 500);
+        });
+    }
+
+    // --- Инициализация ---
+    loadUsers();
+    currentUser = getCurrentUser();
+    updateUserInfo();
+    updateList();
+    </script>
+</body>
+</html>
